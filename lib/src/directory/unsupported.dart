@@ -8,11 +8,10 @@ import '../impl.dart';
 class DirUtils with DirUtilsProtocol implements LocalStorageImpl {
   DirUtils(this.fileName, [this.path, this.debugMode]);
 
-  final String path, fileName;
-  final bool debugMode;
+  final String fileName;
+  final String? path;
 
-  StreamController<Map<String, dynamic>> storage =
-      StreamController<Map<String, dynamic>>();
+  StreamController<Map<String, dynamic>> storage = StreamController<Map<String, dynamic>>();
 
   @override
   Future<void> clear() {
@@ -40,7 +39,7 @@ class DirUtils with DirUtilsProtocol implements LocalStorageImpl {
   }
 
   @override
-  Future<bool> init([Map<String, dynamic> initialData]) {
+  Future<void> init([Map<String, dynamic>? initialData]) {
     throw PlatformNotSupportedError();
   }
 

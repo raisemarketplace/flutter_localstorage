@@ -1,20 +1,13 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:localstorage/localstorage.dart';
 
 void main() {
-  if (!kIsWeb && Platform.isMacOS) {
-    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-  }
-
   runApp(new MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -28,7 +21,7 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key}) : super(key: key);
+  HomePage({Key? key}) : super(key: key);
 
   @override
   _MyHomePageState createState() => new _MyHomePageState();
@@ -38,7 +31,7 @@ class TodoItem {
   String title;
   bool done;
 
-  TodoItem({this.title, this.done});
+  TodoItem({required this.title, required this.done});
 
   toJSONEncodable() {
     Map<String, dynamic> m = new Map();
@@ -51,11 +44,7 @@ class TodoItem {
 }
 
 class TodoList {
-  List<TodoItem> items;
-
-  TodoList() {
-    items = new List();
-  }
+  List<TodoItem> items = [];
 
   toJSONEncodable() {
     return items.map((item) {
@@ -137,7 +126,7 @@ class _MyHomePageState extends State<HomePage> {
                   value: item.done,
                   title: Text(item.title),
                   selected: item.done,
-                  onChanged: (bool selected) {
+                  onChanged: (_) {
                     _toggleItem(item);
                   },
                 );

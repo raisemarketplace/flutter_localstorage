@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/foundation.dart' show ValueNotifier, VoidCallback;
 
@@ -21,31 +20,24 @@ mixin DirUtilsProtocol {
 /// Creates instance of a local storage. Key is used as a filename
 class LocalStorage {
   Stream<Map<String, dynamic>> get stream => _dir.stream;
-  Map<String, dynamic> _initialData;
+  Map<String, dynamic>? _initialData;
+
   static final Map<String, LocalStorage> _cache = new Map();
   final VoidCallback onInitError;
 
-  DirUtilsProtocol _dir;
+  late DirUtils _dir;
 
   /// [ValueNotifier] which notifies about errors during storage initialization
-  ValueNotifier<Error> onError;
+  ValueNotifier<Error> onError = ValueNotifier(Error());
 
   /// A future indicating if localstorage instance is ready for read/write operations
-  Future<bool> ready;
-
-  /// Prevents the file from being accessed more than once
-  Future<void> _lock;
+  late Future<bool> ready;
 
   /// [key] is used as a filename
   /// Optional [path] is used as a directory. Defaults to application document directory
-  factory LocalStorage(String key,
-      {DirUtilsProtocol dirUtils,
-      String path,
-      Map<String, dynamic> initialData,
-      VoidCallback onInitError,
-      bool debugMode}) {
+  factory LocalStorage(String key, [String? path, Map<String, dynamic>? initialData]) {
     if (_cache.containsKey(key)) {
-      return _cache[key];
+      return _cache[key]!;
     } else {
       final instance = LocalStorage._internal(
           key, dirUtils, path, initialData, onInitError, debugMode);
@@ -56,18 +48,12 @@ class LocalStorage {
   }
 
   void dispose() {
-    _dir?.dispose();
+    _dir.dispose();
   }
 
-  LocalStorage._internal(String key,
-      DirUtilsProtocol dirUtils,
-      [String path,
-      Map<String, dynamic> initialData,
-      this.onInitError,
-      bool debugMode]) {
-    _dir = dirUtils ?? DirUtils(key, path, debugMode);
+  LocalStorage._internal(String key, [String? path, Map<String, dynamic>? initialData]) {
+    _dir = DirUtils(key, path);
     _initialData = initialData;
-    onError = new ValueNotifier(null);
 
     ready = new Future<bool>(() async {
       this._init();
@@ -77,10 +63,7 @@ class LocalStorage {
 
   Future<void> _init() async {
     try {
-      var initOK = await _dir.init(_initialData);
-      if (!initOK && onInitError != null) {
-        onInitError();
-      }
+      await _dir.init(_initialData ?? {});
     } on Error catch (err) {
       onError.value = err;
     }
@@ -103,40 +86,32 @@ class LocalStorage {
   Future<void> setItem(
     String key,
     value, [
-    Object toEncodable(Object nonEncodable),
+    Object toEncodable(Object nonEncodable)?,
   ]) async {
-    try {
-      final _encoded =
-          json.encode(toEncodable != null ? toEncodable(value) : value);
-      await _dir.setItem(key, json.decode(_encoded));
-
-      return _attemptFlush();
-    } catch (err) {
-      onError.value = err;
+    var data = toEncodable?.call(value) ?? null;
+    if (data == null) {
+      try {
+        data = value.toJson();
+      } on NoSuchMethodError catch (_) {
+        data = value;
+      }
     }
+
+    await _dir.setItem(key, data);
+
+    return _flush();
   }
 
   /// Removes item from storage by key
   Future<void> deleteItem(String key) async {
     await _dir.remove(key);
-    return _attemptFlush();
+    return _flush();
   }
 
   /// Removes all items from localstorage
   Future<void> clear() async {
     await _dir.clear();
-    return _attemptFlush();
-  }
-
-  Future<void> _attemptFlush() async {
-    if (_lock != null) {
-      await _lock;
-    }
-
-    // Lock will complete when file has been written
-    _lock = _flush();
-
-    return _lock;
+    return _flush();
   }
 
   Future<void> _flush() async {
