@@ -3,8 +3,9 @@ import 'dart:async';
 abstract class LocalStorageImpl {
   LocalStorageImpl(this.fileName, [this.path, this.debugMode]);
 
-  final String path, fileName;
-  final bool debugMode;
+  final String fileName;
+  final String? path;
+
   Stream<Map<String, dynamic>> get stream;
 
   void dispose();
