@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'dart:async';
 import 'dart:convert';
 
@@ -59,8 +60,7 @@ class LocalStorage {
     _dir?.dispose();
   }
 
-  LocalStorage._internal(String key,
-      DirUtilsProtocol dirUtils,
+  LocalStorage._internal(String key, DirUtilsProtocol dirUtils,
       [String path,
       Map<String, dynamic> initialData,
       this.onInitError,

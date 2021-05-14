@@ -5,12 +5,12 @@ author: Andrei Lesnitsky <andrei.lesnitsky@gmail.com>
 homepage: https://github.com/lesnitsky/flutter_localstorage
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: ">=2.12.2 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  path_provider: ^1.4.0
+  path_provider: ^2.0.1
 
 dev_dependencies:
   flutter_test:

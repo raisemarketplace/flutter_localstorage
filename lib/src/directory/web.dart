@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
@@ -89,4 +90,8 @@ class DirUtils implements LocalStorageImpl {
       await _writeToStorage({});
     }
   }
+
+  @override
+  // TODO: implement debugMode
+  bool get debugMode => throw UnimplementedError();
 }
